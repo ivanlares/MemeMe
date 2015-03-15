@@ -7,9 +7,14 @@
 //
 
 import UIKit
+import CoreData
 
 class TableController: UITableViewController {
 
+    var managedContext: NSManagedObjectContext!
+    
+    //#MARK: - Life Cycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -19,12 +24,39 @@ class TableController: UITableViewController {
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    
+    override func viewDidAppear(animated: Bool) {
+        //Present EditMemeController if first Launch && if no data in Store
+        
+        var delegate = UIApplication.sharedApplication().delegate as AppDelegate
+        let emptyStore:Bool = false
+        
+        if let present: Bool = delegate.isFirstLaunch{
+            if present && !emptyStore == true  {
+                var storyboard = UIStoryboard(name: "Main", bundle: nil)
+                var editMeme = storyboard.instantiateViewControllerWithIdentifier("EditMemeController") as UIViewController
+                self.presentViewController(editMeme, animated: true, completion: nil)
+                delegate.isFirstLaunch = false 
+            }
+        }
     }
-
+    
+    
+    deinit{
+        
+    }
+    
+    
+    //# MARK: - Actions
+    
+    
+    @IBAction func didPressAdd(sender: AnyObject) {
+        var storyboard = UIStoryboard(name: "Main", bundle: nil)
+        var editMeme = storyboard.instantiateViewControllerWithIdentifier("EditMemeController") as UIViewController
+        self.presentViewController(editMeme, animated: true, completion: nil)
+    }
+    
+    
     // MARK: - Table view data source
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -93,5 +125,8 @@ class TableController: UITableViewController {
         // Pass the selected object to the new view controller.
     }
     */
+    
+    
+
 
 }
