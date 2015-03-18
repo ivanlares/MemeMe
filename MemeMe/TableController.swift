@@ -9,20 +9,38 @@
 import UIKit
 import CoreData
 
-class TableController: UITableViewController {
+class TableController: UITableViewController, NSFetchedResultsControllerDelegate {
 
     var managedContext: NSManagedObjectContext!
+    
+    var fetchedResultsController: NSFetchedResultsController!
+    
+    
+    
     
     //#MARK: - Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        
+        let fetchRequest = NSFetchRequest(entityName: "Meme")
+        
+        let dateSort =
+            NSSortDescriptor(key: "date", ascending: false)
+        
+        fetchRequest.sortDescriptors = [dateSort]
+        
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
+            managedObjectContext: managedContext, sectionNameKeyPath: nil,
+            cacheName: nil)
+        
+        fetchedResultsController.delegate = self
+        
+        var error: NSError? = nil
+        
+        if (!fetchedResultsController.performFetch(&error)) {
+            println("\(error?.localizedDescription)")
+        }
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -41,11 +59,7 @@ class TableController: UITableViewController {
         }
     }
     
-    
-    deinit{
-        
-    }
-    
+
     
     //# MARK: - Actions
     
@@ -60,73 +74,153 @@ class TableController: UITableViewController {
     // MARK: - Table view data source
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        // #warning Potentially incomplete method implementation.
-        // Return the number of sections.
-        return 0
+
+        return fetchedResultsController.sections!.count
     }
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete method implementation.
-        // Return the number of rows in the section.
-        return 0
+        
+        let sectionInfo =
+            fetchedResultsController.sections![section] as NSFetchedResultsSectionInfo
+        
+        return sectionInfo.numberOfObjects
     }
 
-    /*
+    
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("reuseIdentifier", forIndexPath: indexPath) as UITableViewCell
+        
+        let cell = tableView.dequeueReusableCellWithIdentifier("memeCell", forIndexPath: indexPath) as UITableViewCell
 
         // Configure the cell...
-
+        configureCell(cell, index: indexPath)
         return cell
     }
-    */
+    
 
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return NO if you do not want the specified item to be editable.
-        return true
+    //Configure cell Method
+    
+    func configureCell(cell: UITableViewCell , index: NSIndexPath ) {
+        
+        let meme = fetchedResultsController.objectAtIndexPath(index) as Meme
+        
+        cell.textLabel!.text = meme.memedImage
+        
+        let fileManager = NSFileManager.defaultManager()
+        let documentsDirectory =
+        NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+        let dirPath = documentsDirectory[0] as String
+        
+   
+        var getImagePath = dirPath.stringByAppendingPathComponent(meme.memedImage)
+        
+    
+        cell.imageView?.image = UIImage(contentsOfFile: getImagePath)
+        
+//        let formatter = NSDateFormatter()
+//      formatter.dateStyle = NSDateFormatterStyle.MediumStyle
+//        formatter.timeStyle = NSDateFormatterStyle.ShortStyle
+//        
+//        cell.detailTextLabel!.text = formatter.stringFromDate(meme.date)
+
     }
-    */
+    
+    
 
-    /*
-    // Override to support editing the table view.
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete {
-            // Delete the row from the data source
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        } else if editingStyle == .Insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
+    
+    
 
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return NO if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
+    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
+
+
+        
+        if segue.identifier == "showMeme"{
+         
+            var detailMemeController = segue.destinationViewController as MemeDetailController
+            
+            if let indexPath = self.tableView.indexPathForSelectedRow(){
+                let meme = self.fetchedResultsController.objectAtIndexPath(indexPath) as Meme
+                
+                detailMemeController.managedContext = self.managedContext
+                detailMemeController.selectedImageName = meme.memedImage
+                
+            }
+            
+        }
+        
+        
+        
     }
-    */
-    
     
 
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
+        
+        performSegueWithIdentifier("showMeme", sender: self)
+        
+    }
+    
+    
+    //#MARK: - NSFetchedResultsControllerDelegate Methods
+    
+    func controllerWillChangeContent(controller: NSFetchedResultsController!) {
+        
+        tableView.beginUpdates()
+    }
+
+    
+    
+    func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject,
+        atIndexPath indexPath: NSIndexPath!,
+        forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath!) {
+            
+            switch type {
+                
+            case .Insert:
+                tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
+            case .Delete:
+                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            case .Update:
+                let cellToUpdate =
+                    self.tableView.cellForRowAtIndexPath(indexPath) as UITableViewCell!
+                configureCell(cellToUpdate, index: indexPath)
+                
+            case .Move:
+                tableView.deleteRowsAtIndexPaths([indexPath],
+                    withRowAnimation: .Automatic)
+                tableView.insertRowsAtIndexPaths([newIndexPath],
+                    withRowAnimation: .Automatic)
+            default:
+                break
+                
+            }
+    }
+    
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        
+        tableView.endUpdates()
+    }
+    
+    
+    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int,
+        forChangeType type: NSFetchedResultsChangeType) {
+            
+            let indexSet = NSIndexSet(index: sectionIndex)
+            
+            switch type {
+                
+                case .Insert:
+                    tableView.insertSections(indexSet, withRowAnimation: .Automatic)
+                case .Delete:
+                    tableView.deleteSections(indexSet, withRowAnimation: .Automatic)
+                default :
+                    break
+            }
+    }
+
+    
+    
 
 }

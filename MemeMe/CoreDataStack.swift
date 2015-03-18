@@ -60,7 +60,8 @@ class CoreDataStack {
         let fileManager = NSFileManager.defaultManager()
         
         let urls = fileManager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask) as [NSURL]
-        println(urls[0]) 
+        
+        println(urls[0]) // Prints link to documents directory 
         
         return urls[0]
     }
