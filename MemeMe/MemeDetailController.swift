@@ -11,14 +11,11 @@ import CoreData
 
 class MemeDetailController: UIViewController {
     
-    
     var managedContext: NSManagedObjectContext!
     
     var selectedImageName: String!
     
-    
     @IBOutlet weak var memeImageView: UIImageView!
-    
     
     
     

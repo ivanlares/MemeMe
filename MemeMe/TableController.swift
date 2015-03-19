@@ -22,11 +22,11 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         let fetchRequest = NSFetchRequest(entityName: "Meme")
         
         let dateSort =
-            NSSortDescriptor(key: "date", ascending: false)
+            NSSortDescriptor(key: "memedImage", ascending: false)
         
         fetchRequest.sortDescriptors = [dateSort]
         
@@ -41,7 +41,22 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
         if (!fetchedResultsController.performFetch(&error)) {
             println("\(error?.localizedDescription)")
         }
+        
+        
+        //Sign up for NSManagedObjectContextDidSaveNotification 
+        //To know when other Controllers make changes to the NSPersistentStore
+        //This way we can keep the TableView updated with the latest info
+        var center: NSNotificationCenter = NSNotificationCenter.defaultCenter()
+        center.addObserver(self, selector: "refreshData:", name: NSManagedObjectContextDidSaveNotification, object: nil)
     }
+    
+    func refreshData(notification: NSNotification){
+        //Merges any data that was created with other instances of the managedObjectContext
+        //Data that was added in EditMemeController is Merged
+        self.managedContext.mergeChangesFromContextDidSaveNotification(notification)
+    }
+    
+    
     
     override func viewDidAppear(animated: Bool) {
         //Present EditMemeController if first Launch && if no data in Store
@@ -50,6 +65,7 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
         let emptyStore:Bool = false
         
         if let present: Bool = delegate.isFirstLaunch{
+            
             if present && !emptyStore == true  {
                 var storyboard = UIStoryboard(name: "Main", bundle: nil)
                 var editMeme = storyboard.instantiateViewControllerWithIdentifier("EditMemeController") as UIViewController
@@ -57,12 +73,11 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
                 delegate.isFirstLaunch = false 
             }
         }
+        
     }
     
-
     
     //# MARK: - Actions
-    
     
     @IBAction func didPressAdd(sender: AnyObject) {
         var storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -91,7 +106,7 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
         
         let cell = tableView.dequeueReusableCellWithIdentifier("memeCell", forIndexPath: indexPath) as UITableViewCell
 
-        // Configure the cell...
+        // Configure the cell and return it
         configureCell(cell, index: indexPath)
         return cell
     }
@@ -135,10 +150,8 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
 
-
-        
         if segue.identifier == "showMeme"{
-         
+            
             var detailMemeController = segue.destinationViewController as MemeDetailController
             
             if let indexPath = self.tableView.indexPathForSelectedRow(){
@@ -146,63 +159,46 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
                 
                 detailMemeController.managedContext = self.managedContext
                 detailMemeController.selectedImageName = meme.memedImage
-                
             }
-            
         }
-        
-        
-        
     }
     
 
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
-        
         performSegueWithIdentifier("showMeme", sender: self)
-        
     }
     
     
     //#MARK: - NSFetchedResultsControllerDelegate Methods
     
     func controllerWillChangeContent(controller: NSFetchedResultsController!) {
-        
         tableView.beginUpdates()
     }
-
-    
     
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject,
         atIndexPath indexPath: NSIndexPath!,
         forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath!) {
             
             switch type {
-                
-            case .Insert:
-                tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
-            case .Delete:
-                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
-            case .Update:
-                let cellToUpdate =
-                    self.tableView.cellForRowAtIndexPath(indexPath) as UITableViewCell!
-                configureCell(cellToUpdate, index: indexPath)
-                
-            case .Move:
-                tableView.deleteRowsAtIndexPaths([indexPath],
-                    withRowAnimation: .Automatic)
-                tableView.insertRowsAtIndexPaths([newIndexPath],
-                    withRowAnimation: .Automatic)
-            default:
-                break
-                
+                case .Insert:
+                    tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
+                case .Delete:
+                    tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                case .Update:
+                    let cellToUpdate =
+                        self.tableView.cellForRowAtIndexPath(indexPath) as UITableViewCell!
+                    configureCell(cellToUpdate, index: indexPath)
+                case .Move:
+                    tableView.deleteRowsAtIndexPaths([indexPath],
+                        withRowAnimation: .Automatic)
+                    tableView.insertRowsAtIndexPaths([newIndexPath],
+                        withRowAnimation: .Automatic)
+                default:
+                    break
             }
     }
     
-    func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        
-        tableView.endUpdates()
-    }
-    
+
     
     func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int,
         forChangeType type: NSFetchedResultsChangeType) {
@@ -210,7 +206,6 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
             let indexSet = NSIndexSet(index: sectionIndex)
             
             switch type {
-                
                 case .Insert:
                     tableView.insertSections(indexSet, withRowAnimation: .Automatic)
                 case .Delete:
@@ -220,6 +215,12 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
             }
     }
 
+    
+    
+    
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        tableView.endUpdates()
+    }
     
     
 

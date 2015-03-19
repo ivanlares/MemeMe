@@ -123,8 +123,8 @@
 		EA6EC93D1AB4E7FE00028A0D /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				EA6EC94D1AB4F7E000028A0D /* MemeMe.xcdatamodeld */,
 				EA6EC9491AB4F03500028A0D /* Meme.swift */,
+				EA6EC94D1AB4F7E000028A0D /* MemeMe.xcdatamodeld */,
 				EA6EC91D1AB4E04F00028A0D /* AppDelegate.swift */,
 				EA6EC94B1AB4F29E00028A0D /* CoreDataStack.swift */,
 			);
@@ -144,9 +144,9 @@
 		EA6EC93F1AB4E80D00028A0D /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				EAFA6B7C1AB9309200581A6E /* MemeDetailController.swift */,
-				EA6EC9401AB4E8DA00028A0D /* EditMemeController.swift */,
 				EA6EC9421AB4E90800028A0D /* TableController.swift */,
+				EA6EC9401AB4E8DA00028A0D /* EditMemeController.swift */,
+				EAFA6B7C1AB9309200581A6E /* MemeDetailController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";

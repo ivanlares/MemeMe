@@ -45,13 +45,12 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
         bottomField.textAlignment = NSTextAlignment.Center
         bottomField.text = "BOTTOM"
         
-        //Documents Directory File Path
+        //Print files in documentsDirectory
         
-        let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
-        let dirPath = documentsDirectory[0] as String
-        
-        let fileMannager: NSFileManager = NSFileManager()
-       println( fileMannager.contentsOfDirectoryAtPath(dirPath, error: nil) )
+//        let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+//        let dirPath = documentsDirectory[0] as String
+//        let fileMannager: NSFileManager = NSFileManager()
+//        println( fileMannager.contentsOfDirectoryAtPath(dirPath, error: nil) )
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -73,57 +72,15 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
     }
     
     @IBAction func shareButtonPressed(sender: UIBarButtonItem) {
-        
+        //generateMemedImage returns a memedImage
         let image = generateMemedImage()
+        //UIActivityViewController is created here
         var controller = UIActivityViewController(activityItems: [image], applicationActivities: nil)
-        
+        //Closure will be executed when (controller: UIActivitViewController) is done
         controller.completionWithItemsHandler = {(type: String!,completed: Bool, returnedItems: [AnyObject]!, error: NSError!) -> Void in
-            // /* my code
-            if completed {
-                
-                //Documents Directory File Path
-
-                let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
-                let dirPath = documentsDirectory[0] as String
-       
-                
-                //Create date for file name 
-                let currentDateTime = NSDate()
-                let formatter = NSDateFormatter()
-                formatter.dateFormat = "ddMMyyyy-HHmmss"
-                
-                //File Name 
-                let pictureName = formatter.stringFromDate(currentDateTime) + ".png"
-                let pathArray = [dirPath, pictureName]
-                let filePath = NSURL.fileURLWithPathComponents(pathArray)
-                
-                //Save to documents Directory : save memed image only for now
-                let memedImageData:NSData = UIImagePNGRepresentation(image)
-                memedImageData.writeToURL(filePath!, atomically: true)
-        
-                //Save to coreData 
-            let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
-            let managedObjectContext = appDelegate.coreDataStack.context as NSManagedObjectContext
-            let memeEntity =
-                NSEntityDescription.entityForName("Meme", inManagedObjectContext: managedObjectContext)
-                
-            let meme = Meme(entity: memeEntity! , insertIntoManagedObjectContext: managedObjectContext)
-        
-                //meme.originalImage = 
-                meme.memedImage = formatter.stringFromDate(currentDateTime) + ".png"
-                //meme.topString =
-                //meme.bottomString =
-                //meme.dateString = formatter.stringFromDate(currentDateTime)
-                
-
-                var error: NSError?
-                if !managedObjectContext.save(&error) {
-                    println("\(error?.localizedDescription)")
-                }
-
-            
-            }
-            
+            //saveSentMeme saves actual image to Documents Directory
+            //it only saves the link to image with CoreData
+            self.saveSentMeme(completed, image: image)
         }
         
         self.presentViewController(controller, animated: true, completion: nil)
@@ -223,6 +180,60 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
         
         return memedImage
     }
+    
+    
+    //#MARK: - Persistence Methods 
+    
+    func saveSentMeme(sent: Bool, image: UIImage) {
+        
+        if sent {
+            
+            //Documents Directory File Path
+            
+            let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+            let dirPath = documentsDirectory[0] as String
+            
+            
+            //Create date for file name
+            let currentDateTime = NSDate()
+            let formatter = NSDateFormatter()
+            formatter.dateFormat = "ddMMyyyy-HHmmss"
+            
+            //File Name
+            let pictureName = formatter.stringFromDate(currentDateTime) + ".png"
+            let pathArray = [dirPath, pictureName]
+            let filePath = NSURL.fileURLWithPathComponents(pathArray)
+            
+            //Save to documents Directory : save memed image only for now
+            let memedImageData:NSData = UIImagePNGRepresentation(image)
+            memedImageData.writeToURL(filePath!, atomically: true)
+            
+            //Save to coreData
+            let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
+            let managedObjectContext = appDelegate.coreDataStack.context as NSManagedObjectContext
+            let memeEntity =
+            NSEntityDescription.entityForName("Meme", inManagedObjectContext: managedObjectContext)
+            
+            let meme = Meme(entity: memeEntity! , insertIntoManagedObjectContext: managedObjectContext)
+            
+            //meme.originalImage =
+            meme.memedImage = formatter.stringFromDate(currentDateTime) + ".png"
+            //meme.topString =
+            //meme.bottomString =
+            //meme.dateString = formatter.stringFromDate(currentDateTime)
+            
+            
+            var error: NSError?
+            if !managedObjectContext.save(&error) {
+                println("\(error?.localizedDescription)")
+            }
+            
+            
+        }
+        
+    }
+    
+    
     
     //#MARK: - Notification Methods
     
