@@ -42,6 +42,7 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
             println("\(error?.localizedDescription)")
         }
         
+    
         
         //Sign up for NSManagedObjectContextDidSaveNotification 
         //To know when other Controllers make changes to the NSPersistentStore
@@ -50,6 +51,7 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
         center.addObserver(self, selector: "refreshData:", name: NSManagedObjectContextDidSaveNotification, object: nil)
     }
     
+    //Refresh Data for table
     func refreshData(notification: NSNotification){
         //Merges any data that was created with other instances of the managedObjectContext
         //Data that was added in EditMemeController is Merged
@@ -57,23 +59,20 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
     }
     
     
-    
     override func viewDidAppear(animated: Bool) {
-        //Present EditMemeController if first Launch && if no data in Store
         
+        //Present EditMemeController if first Launch && if no data in Sore
         var delegate = UIApplication.sharedApplication().delegate as AppDelegate
-        let emptyStore:Bool = false
-        
-        if let present: Bool = delegate.isFirstLaunch{
-            
-            if present && !emptyStore == true  {
+
+        if (delegate.isFirstLaunch == true)  {
+            let emptyStore:Bool = self.tableView.numberOfRowsInSection(0) > 0 ? false : true
+            if (emptyStore == true) {
                 var storyboard = UIStoryboard(name: "Main", bundle: nil)
                 var editMeme = storyboard.instantiateViewControllerWithIdentifier("EditMemeController") as EditMemeController
                 self.presentViewController(editMeme, animated: true, completion: nil)
-                delegate.isFirstLaunch = false 
+                delegate.isFirstLaunch = false
             }
         }
-        
     }
     
     
@@ -111,33 +110,52 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
         return cell
     }
     
-
-    //Configure cell Method
-    
     func configureCell(cell: UITableViewCell , index: NSIndexPath ) {
         
         let meme = fetchedResultsController.objectAtIndexPath(index) as Meme
         
-        cell.textLabel!.text = meme.memedImage
+        cell.textLabel!.text = String("\(meme.topString )\(meme.bottomString)")
         
         let dirPath = directoryPath()
-        
         var getImagePath = dirPath.stringByAppendingPathComponent(meme.memedImage)
-        
         cell.imageView?.image = UIImage(contentsOfFile: getImagePath)
         
-//        let formatter = NSDateFormatter()
-//      formatter.dateStyle = NSDateFormatterStyle.MediumStyle
-//        formatter.timeStyle = NSDateFormatterStyle.ShortStyle
-//        
-//        cell.detailTextLabel!.text = formatter.stringFromDate(meme.date)
+        let formatter = NSDateFormatter()
+        formatter.dateStyle = NSDateFormatterStyle.MediumStyle
+        formatter.timeStyle = NSDateFormatterStyle.ShortStyle
+        cell.detailTextLabel!.text = formatter.stringFromDate(meme.date)
 
     }
     
-    
+    //#MARK: - TableView Deleting 
 
     
+    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        
+        return true
+    }
     
+    
+    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        
+        if editingStyle == .Delete {
+            
+            let memeToDelete =
+            fetchedResultsController.objectAtIndexPath(indexPath) as NSManagedObject
+            
+            self.managedContext.deleteObject(memeToDelete)
+            
+            var error: NSError?
+            
+            if !managedContext.save(&error) {
+                println("\(error?.localizedDescription)")
+            }
+        }
+        
+    }
+
+    
+
 
     
     // MARK: - Navigation
