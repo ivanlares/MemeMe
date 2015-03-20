@@ -11,7 +11,6 @@ import CoreData
 
 class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
 
-
     @IBOutlet weak var topField: UITextField!
     
     @IBOutlet weak var bottomField: UITextField!
@@ -73,18 +72,23 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
     
     @IBAction func shareButtonPressed(sender: UIBarButtonItem) {
         //generateMemedImage returns a memedImage
-        let image = generateMemedImage()
+        let memedImage = generateMemedImage()
+        
         //UIActivityViewController is created here
-        var controller = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+        var controller = UIActivityViewController(activityItems: [memedImage], applicationActivities: nil)
+        
         //Closure will be executed when (controller: UIActivitViewController) is done
         controller.completionWithItemsHandler = {(type: String!,completed: Bool, returnedItems: [AnyObject]!, error: NSError!) -> Void in
-            //saveSentMeme saves actual image to Documents Directory
-            //it only saves the link to image with CoreData
-            self.saveSentMeme(completed, image: image)
+            //saves Meme If cancel button is not pressed
+            //Array with activity types that shouldnt be saved: like printing
+            var notSentTypes = [UIActivityTypePrint, UIActivityTypeCopyToPasteboard, UIActivityTypeAssignToContact, UIActivityTypeSaveToCameraRoll, UIActivityTypeAddToReadingList] as [String]
+            //Save only if activity type is not in array
+            if (contains(notSentTypes, type ) == false ){
+                self.saveSentMeme(completed, memedImage: memedImage)
+                    }
         }
-        
+        //Presents the activityController
         self.presentViewController(controller, animated: true, completion: nil)
-        
     }
     
     @IBAction func pickImageAlbum(sender: UIBarButtonItem) {
@@ -160,6 +164,68 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
         }
     }
     
+    
+    
+    //#MARK: - Persistence Methods 
+    
+    func saveSentMeme(sent: Bool, memedImage: UIImage) {
+        if sent {
+            //Get Documents Directory File Path
+            let dirPath = directoryPath()
+            
+            //Current Date to create unique file name
+            let currentDateTime = NSDate()
+            
+            //Create name for Images
+            var memedImageName = nameForImage(currentDateTime, memed: true)
+            var originalImageName = nameForImage(currentDateTime, memed: false)
+            
+            //Create NSURl for memed Image
+            let memePathArray = [dirPath, memedImageName]
+            let memeFilePath = NSURL.fileURLWithPathComponents(memePathArray)
+            //Create NSURL for original Image
+            let originalPathArray = [dirPath, originalImageName]
+            let originalFilePath = NSURL.fileURLWithPathComponents(originalPathArray)
+            
+            //Save memed image to documents directory
+            let memedImageData:NSData = UIImagePNGRepresentation(memedImage)
+            memedImageData.writeToURL(memeFilePath!, atomically: true)
+            //Save original image to documents directory 
+            let originalImageData:NSData = UIImagePNGRepresentation(self.imageView.image!)
+            originalImageData.writeToURL(originalFilePath!, atomically: true)
+            
+            //Get refrence to ManagedObjectContext & Create a ManagedObject
+            let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
+            let managedObjectContext = appDelegate.coreDataStack.context as NSManagedObjectContext
+            let memeEntity =
+            NSEntityDescription.entityForName("Meme", inManagedObjectContext: managedObjectContext)
+            let meme = Meme(entity: memeEntity! , insertIntoManagedObjectContext: managedObjectContext)
+            //set the values for the managedObject
+            meme.originalImage = originalImageName
+            meme.memedImage = memedImageName
+            meme.topString = self.topField.text
+            meme.bottomString = self.bottomField.text
+            meme.date = currentDateTime
+            //Save to coreData
+            var error: NSError?
+            if !managedObjectContext.save(&error) {
+                println("\(error?.localizedDescription)")
+            }
+        }
+    }
+    
+    
+    //#MARK: - Helper Methods
+    
+    func directoryPath() ->String {
+        let fileManager = NSFileManager.defaultManager()
+        let documentsDirectory =
+        NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+        let dirPath = documentsDirectory[0] as String
+        
+        return dirPath
+    }
+    
     func generateMemedImage() -> UIImage
     {
         //Hide topToolbar and bottomToolbar
@@ -181,55 +247,20 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
         return memedImage
     }
     
-    
-    //#MARK: - Persistence Methods 
-    
-    func saveSentMeme(sent: Bool, image: UIImage) {
+    func nameForImage(date: NSDate, memed: Bool) -> String{
         
-        if sent {
-            
-            //Documents Directory File Path
-            
-            let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
-            let dirPath = documentsDirectory[0] as String
-            
-            
-            //Create date for file name
-            let currentDateTime = NSDate()
-            let formatter = NSDateFormatter()
-            formatter.dateFormat = "ddMMyyyy-HHmmss"
-            
-            //File Name
-            let pictureName = formatter.stringFromDate(currentDateTime) + ".png"
-            let pathArray = [dirPath, pictureName]
-            let filePath = NSURL.fileURLWithPathComponents(pathArray)
-            
-            //Save to documents Directory : save memed image only for now
-            let memedImageData:NSData = UIImagePNGRepresentation(image)
-            memedImageData.writeToURL(filePath!, atomically: true)
-            
-            //Save to coreData
-            let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
-            let managedObjectContext = appDelegate.coreDataStack.context as NSManagedObjectContext
-            let memeEntity =
-            NSEntityDescription.entityForName("Meme", inManagedObjectContext: managedObjectContext)
-            
-            let meme = Meme(entity: memeEntity! , insertIntoManagedObjectContext: managedObjectContext)
-            
-            //meme.originalImage =
-            meme.memedImage = formatter.stringFromDate(currentDateTime) + ".png"
-            //meme.topString =
-            //meme.bottomString =
-            //meme.dateString = formatter.stringFromDate(currentDateTime)
-            
-            
-            var error: NSError?
-            if !managedObjectContext.save(&error) {
-                println("\(error?.localizedDescription)")
-            }
-            
-            
+        let currentDateTime = date
+        let formatter = NSDateFormatter()
+        formatter.dateFormat = "ddMMyyyy-HHmmss"
+        var pictureName: String!
+        
+        if (memed == true) {
+             pictureName = formatter.stringFromDate(currentDateTime) + "memed" + ".png"
+        } else {
+             pictureName = formatter.stringFromDate(currentDateTime) + ".png"
         }
+        
+        return pictureName
         
     }
     
@@ -292,9 +323,7 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
         }
     }
     
-    
-    
-    
+
     
     
 }

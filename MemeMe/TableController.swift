@@ -68,7 +68,7 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
             
             if present && !emptyStore == true  {
                 var storyboard = UIStoryboard(name: "Main", bundle: nil)
-                var editMeme = storyboard.instantiateViewControllerWithIdentifier("EditMemeController") as UIViewController
+                var editMeme = storyboard.instantiateViewControllerWithIdentifier("EditMemeController") as EditMemeController
                 self.presentViewController(editMeme, animated: true, completion: nil)
                 delegate.isFirstLaunch = false 
             }
@@ -120,15 +120,10 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
         
         cell.textLabel!.text = meme.memedImage
         
-        let fileManager = NSFileManager.defaultManager()
-        let documentsDirectory =
-        NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
-        let dirPath = documentsDirectory[0] as String
+        let dirPath = directoryPath()
         
-   
         var getImagePath = dirPath.stringByAppendingPathComponent(meme.memedImage)
         
-    
         cell.imageView?.image = UIImage(contentsOfFile: getImagePath)
         
 //        let formatter = NSDateFormatter()
@@ -166,6 +161,19 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
 
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
         performSegueWithIdentifier("showMeme", sender: self)
+    }
+    
+    
+    
+    //#MARK: - Helper Methods 
+    
+    func directoryPath() ->String {
+        let fileManager = NSFileManager.defaultManager()
+        let documentsDirectory =
+        NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+        let dirPath = documentsDirectory[0] as String
+        
+        return dirPath
     }
     
     
