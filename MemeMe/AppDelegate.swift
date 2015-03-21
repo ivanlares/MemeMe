@@ -33,7 +33,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let tableViewController =
                 navigationController.topViewController as TableController
             tableViewController.managedContext = coreDataStack.context
-
+            
+            //second tab item
+            var navigationControllerCollection = tabItems[1] as UINavigationController
+            
+            let collectionViewController =
+                navigationControllerCollection.topViewController as CollectionController
+            
+            collectionViewController.managedContext = coreDataStack.context
         }
 
         return true

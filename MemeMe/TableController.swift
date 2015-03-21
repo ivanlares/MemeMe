@@ -114,10 +114,11 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
         
         let meme = fetchedResultsController.objectAtIndexPath(index) as Meme
         
-        cell.textLabel!.text = String("\(meme.topString )\(meme.bottomString)")
+        cell.textLabel!.text = String("\(meme.topString) \(meme.bottomString)")
         
         let dirPath = directoryPath()
         var getImagePath = dirPath.stringByAppendingPathComponent(meme.memedImage)
+        cell.imageView?.contentMode = UIViewContentMode.ScaleAspectFit
         cell.imageView?.image = UIImage(contentsOfFile: getImagePath)
         
         let formatter = NSDateFormatter()
@@ -125,6 +126,16 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
         formatter.timeStyle = NSDateFormatterStyle.ShortStyle
         cell.detailTextLabel!.text = formatter.stringFromDate(meme.date)
 
+    }
+    
+    @IBAction func ToggleEditMode(sender: UIBarButtonItem) {
+            if self.tableView.editing == true {
+               self.tableView.setEditing(false, animated: true)
+                sender.title = "Edit"
+            } else  {
+                self.tableView.setEditing(true, animated: true)
+                sender.title = "Done"
+            }
     }
     
     //#MARK: - TableView Deleting 

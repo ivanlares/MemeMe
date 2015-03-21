@@ -26,7 +26,6 @@ class MemeDetailController: UIViewController {
         let dirPath = documentsDirectory[0] as String
         
         var getImagePath = dirPath.stringByAppendingPathComponent(selectedImageName)
-        println(selectedImageName)
         memeImageView.contentMode  = UIViewContentMode.ScaleAspectFit
         memeImageView.image = UIImage(contentsOfFile: getImagePath)
     }
