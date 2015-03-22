@@ -16,56 +16,28 @@ class CollectionController: UICollectionViewController {
     var memes: [Meme]?
     
     override func viewDidLoad() {
-        
-       
-        
-        
-        
-        
+        //Fill up memes with data from the ManagedObjectContext
         let fetchRequest = NSFetchRequest(entityName: "Meme")
-        
         let dateSort =
-        NSSortDescriptor(key: "date", ascending: false)
-        
+            NSSortDescriptor(key: "date", ascending: false)
         fetchRequest.sortDescriptors = [dateSort]
-        
         memes = managedContext.executeFetchRequest(fetchRequest, error: nil) as [Meme]?
-        
-        
-        
-        
+    
         //Sign up for NSManagedObjectContextDidSaveNotification
         //To know when other Controllers make changes to the NSPersistentStore
         //This way we can keep the TableView updated with the latest info
         var center: NSNotificationCenter = NSNotificationCenter.defaultCenter()
         center.addObserver(self, selector: "refreshData:", name: NSManagedObjectContextDidSaveNotification, object: nil)
-        
-        
-//        
-//        var delegateApp = UIApplication.sharedApplication().delegate as AppDelegate
-//        
-//        self.managedContext = delegateApp.coreDataStack.context
-//        //fetch
-//        let fetchRequest = NSFetchRequest(entityName: "Meme")
-//        
-//        let dateSort =
-//        NSSortDescriptor(key: "date", ascending: false)
-//        
-//        fetchRequest.sortDescriptors = [dateSort]
-//        
-//        memes = managedContext.executeFetchRequest(fetchRequest, error: nil) as [Meme]?
-//        //reload
-//        collectionView?.reloadData()
-        
-        
-        
-    }
-
     
-    override func viewDidAppear(animated: Bool) {
-      
-
     }
+
+
+    @IBAction func didPressAdd(sender: UIBarButtonItem) {
+        var storyboard = UIStoryboard(name: "Main", bundle: nil)
+        var editMeme = storyboard.instantiateViewControllerWithIdentifier("EditMemeController") as UIViewController
+        self.presentViewController(editMeme, animated: true, completion: nil)
+    }
+    
     
     
     //Refresh Data for table
@@ -89,25 +61,19 @@ class CollectionController: UICollectionViewController {
     override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return self.memes!.count
     }
-    
-    override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        
-        var cell = collectionView.dequeueReusableCellWithReuseIdentifier("collectionCell", forIndexPath: indexPath) as CollectionCell
 
-        
-        // Set the name and image
-        //cell.dateLabel.text = memes![indexPath.row].date
+    override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        //Create cell
+        var cell = collectionView.dequeueReusableCellWithReuseIdentifier("collectionCell", forIndexPath: indexPath) as CollectionCell
+        //Set Date
         let formatter = NSDateFormatter()
         formatter.dateStyle = NSDateFormatterStyle.MediumStyle
-        //formatter.timeStyle = NSDateFormatterStyle.NoStyle
         cell.dateLabel.text  = formatter.stringFromDate(memes![indexPath.row].date)
-        
-        
+        //Set Image
         let dirPath = directoryPath()
         var getImagePath = dirPath.stringByAppendingPathComponent(memes![indexPath.row].memedImage)
         cell.memedCellImage?.contentMode = UIViewContentMode.ScaleAspectFit
         cell.memedCellImage?.image = UIImage(contentsOfFile: getImagePath)
-        
         
         return cell
     }
@@ -115,18 +81,16 @@ class CollectionController: UICollectionViewController {
     
     
     // MARK: - Navigation
-
+    
+    //Present MemeDetailController
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         
         if segue.identifier == "showMeme"{
-            
             var detailMemeController = segue.destinationViewController as MemeDetailController
-            
             if let indexPath = self.collectionView?.indexPathsForSelectedItems()[0] as? NSIndexPath{
                 let meme = self.memes![indexPath.row]
-                
                 detailMemeController.managedContext = self.managedContext
-                detailMemeController.selectedImageName = meme.memedImage
+                detailMemeController.selectedMeme = meme
             }
         }
     }
@@ -136,7 +100,7 @@ class CollectionController: UICollectionViewController {
         performSegueWithIdentifier("showMeme", sender: self)
     }
     
-
+    //#MARK: - convenience   
     func directoryPath() ->String {
         let fileManager = NSFileManager.defaultManager()
         let documentsDirectory =

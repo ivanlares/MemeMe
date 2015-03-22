@@ -39,17 +39,10 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
         topField.textAlignment = NSTextAlignment.Center
         topField.text = "TOP"
         
-        
         bottomField.defaultTextAttributes = memeTextAttributes
         bottomField.textAlignment = NSTextAlignment.Center
         bottomField.text = "BOTTOM"
         
-        //Print files in documentsDirectory
-        
-//        let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
-//        let dirPath = documentsDirectory[0] as String
-//        let fileMannager: NSFileManager = NSFileManager()
-//        println( fileMannager.contentsOfDirectoryAtPath(dirPath, error: nil) )
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -163,7 +156,6 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
             (self.topToolbar.items![0] as UIBarButtonItem).enabled = true
         }
     }
-    
     
     
     //#MARK: - Persistence Methods 
@@ -285,7 +277,6 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
         center.removeObserver(self, name: UIKeyboardWillHideNotification, object: nil)
         center.removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
     }
-    
 
     //#MARK: - UIImagePickerControllerDelegate Methods
     
@@ -303,15 +294,15 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
         
     }
     
-    
     //#MARK: - UITextFieldDelgate Methods
     
     func keyboardWillHide(notification: NSNotification){
+        //Move view back in position
         self.view.frame.origin.y = 0.0
     }
     
     func keyboardWillShow(notification: NSNotification){
-
+        //Move view up when keyboard blocks bottomTextField
         if let info:NSDictionary = notification.userInfo {
             let keyboardSize =
             (info[UIKeyboardFrameEndUserInfoKey] as NSValue).CGRectValue()

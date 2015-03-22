@@ -20,8 +20,10 @@ class CoreDataStack {
     let store:NSPersistentStore?
     
     
-    
     init(){
+        //The CoreDataStack is created 
+        //The store is conected to the model and the cordinator 
+        //the cordinator is connected to the context
         
         let bundle = NSBundle.mainBundle()
         let modelURL = bundle.URLForResource("MemeMe", withExtension:"momd")
@@ -43,25 +45,15 @@ class CoreDataStack {
     }
     
     
-    
-    
     func saveContext() {
         var error: NSError? = nil
-        
         context.save(&error)
-        
-        
     }
     
-    
-    
+
     func applicationDocumentsDirectory() -> NSURL {
-        
         let fileManager = NSFileManager.defaultManager()
-        
         let urls = fileManager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask) as [NSURL]
-        
-        println(urls[0]) // Prints link to documents directory 
         
         return urls[0]
     }

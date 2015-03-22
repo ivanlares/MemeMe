@@ -18,21 +18,8 @@ class Meme: NSManagedObject {
     @NSManaged var date: NSDate
     
     
-    
-    
-    func filePath()-> NSURL? {
-        
-        let documentsDirectory =
-        NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
-        
-        let dirPath = documentsDirectory[0] as String
-        
-        let pathArray = [dirPath, memedImage]
-        
-        return NSURL.fileURLWithPathComponents(pathArray)
-        
-    }
-    
+    //Delete image files from documents directory when 
+    //NSManagedObject is deleted
     override func prepareForDeletion() {
         
         let fileManager = NSFileManager.defaultManager()
@@ -43,6 +30,7 @@ class Meme: NSManagedObject {
         let dirPath = documentsDirectory[0] as String
         
         fileManager.removeItemAtPath("\(dirPath)/\(memedImage)", error: nil)
+        fileManager.removeItemAtPath("\(dirPath)/\(originalImage)", error: nil)
     }
     
     

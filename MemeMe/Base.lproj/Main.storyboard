@@ -5,7 +5,7 @@
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
-        <!--Table Controller-->
+        <!--Sent-->
         <scene sceneID="2l0-mo-CFh">
             <objects>
                 <tableViewController id="5dT-9F-avD" customClass="TableController" customModule="MemeMe" customModuleProvider="target" sceneMemberID="viewController">
@@ -40,7 +40,7 @@
                             <outlet property="delegate" destination="5dT-9F-avD" id="J8u-AU-wlR"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="AvG-cT-tUd">
+                    <navigationItem key="navigationItem" title="Sent" id="AvG-cT-tUd">
                         <barButtonItem key="leftBarButtonItem" title="Edit" id="dmB-hq-omw">
                             <connections>
                                 <action selector="ToggleEditMode:" destination="5dT-9F-avD" id="uuj-5G-sMg"/>
@@ -60,7 +60,7 @@
             </objects>
             <point key="canvasLocation" x="2030" y="-58"/>
         </scene>
-        <!--Collection Controller-->
+        <!--Sent-->
         <scene sceneID="0M5-5N-b3x">
             <objects>
                 <collectionViewController id="Bje-ji-wvw" customClass="CollectionController" customModule="MemeMe" customModuleProvider="target" sceneMemberID="viewController">
@@ -117,14 +117,20 @@
                             <outlet property="delegate" destination="Bje-ji-wvw" id="rFz-o8-gam"/>
                         </connections>
                     </collectionView>
-                    <navigationItem key="navigationItem" id="rj9-wE-5p8"/>
+                    <navigationItem key="navigationItem" title="Sent" id="rj9-wE-5p8">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="McG-YQ-FSD">
+                            <connections>
+                                <action selector="didPressAdd:" destination="Bje-ji-wvw" id="0Ks-Ox-1CI"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <segue destination="uaY-n2-aWC" kind="show" identifier="showMeme" id="iuc-2T-8Ny"/>
                     </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vqj-nd-Xfl" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2030" y="611"/>
+            <point key="canvasLocation" x="2030" y="601"/>
         </scene>
         <!--Meme Detail Controller-->
         <scene sceneID="TyA-6e-h2F">
@@ -150,6 +156,8 @@
                             <constraint firstAttribute="bottom" secondItem="AT8-7T-caI" secondAttribute="bottom" id="nWH-aV-jRn"/>
                         </constraints>
                     </view>
+                    <toolbarItems/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="memeImageView" destination="AT8-7T-caI" id="KbS-I9-EgP"/>
                     </connections>
@@ -228,10 +236,10 @@
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="BUE-Uj-nXa">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                             </imageView>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ygD-tY-UGX">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="center" clearsOnBeginEditing="YES" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ygD-tY-UGX">
                                 <rect key="frame" x="0.0" y="504" width="600" height="17"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" autocapitalizationType="allCharacters"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="allCharacters" autocorrectionType="no"/>
                             </textField>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aJl-EH-hME">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
@@ -279,10 +287,10 @@
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="RAv-m8-eux"/>
                                 </items>
                             </toolbar>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="center" minimumFontSize="12" translatesAutoresizingMaskIntoConstraints="NO" id="wua-F7-RJU">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="center" clearsOnBeginEditing="YES" minimumFontSize="12" translatesAutoresizingMaskIntoConstraints="NO" id="wua-F7-RJU">
                                 <rect key="frame" x="0.0" y="79" width="600" height="17"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" autocapitalizationType="allCharacters"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="allCharacters" autocorrectionType="no" spellCheckingType="yes"/>
                             </textField>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>

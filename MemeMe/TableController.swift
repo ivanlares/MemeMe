@@ -12,14 +12,15 @@ import CoreData
 class TableController: UITableViewController, NSFetchedResultsControllerDelegate {
 
     var managedContext: NSManagedObjectContext!
-    
     var fetchedResultsController: NSFetchedResultsController!
+    /* NSFetchedResultsController
+    "Its purpose is to make developers’ lives easier by abstracting away much of the code needed to synchronize a table view with a data source backed by Core Data." - Core Data by tutorial
+    */
     
     
     
-    
+
     //#MARK: - Life Cycle
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -42,8 +43,6 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
             println("\(error?.localizedDescription)")
         }
         
-    
-        
         //Sign up for NSManagedObjectContextDidSaveNotification 
         //To know when other Controllers make changes to the NSPersistentStore
         //This way we can keep the TableView updated with the latest info
@@ -61,7 +60,7 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
     
     override func viewDidAppear(animated: Bool) {
         
-        //Present EditMemeController if first Launch && if no data in Sore
+        //Present EditMemeController if (is first Launch) && if (no data in Sore)
         var delegate = UIApplication.sharedApplication().delegate as AppDelegate
 
         if (delegate.isFirstLaunch == true)  {
@@ -79,41 +78,49 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
     //# MARK: - Actions
     
     @IBAction func didPressAdd(sender: AnyObject) {
+        //Grab an instance of EditMemeController and present it modally
         var storyboard = UIStoryboard(name: "Main", bundle: nil)
         var editMeme = storyboard.instantiateViewControllerWithIdentifier("EditMemeController") as UIViewController
         self.presentViewController(editMeme, animated: true, completion: nil)
     }
     
+
+    @IBAction func ToggleEditMode(sender: UIBarButtonItem) {
+            if self.tableView.editing == true {
+               self.tableView.setEditing(false, animated: true)
+                sender.title = "Edit"
+            } else  {
+                self.tableView.setEditing(true, animated: true)
+                sender.title = "Done"
+            }
+    }
+    
     
     // MARK: - Table view data source
-
+    
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-
         return fetchedResultsController.sections!.count
     }
-
+    
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
         let sectionInfo =
             fetchedResultsController.sections![section] as NSFetchedResultsSectionInfo
-        
         return sectionInfo.numberOfObjects
     }
-
+    
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        
         let cell = tableView.dequeueReusableCellWithIdentifier("memeCell", forIndexPath: indexPath) as UITableViewCell
-
         // Configure the cell and return it
         configureCell(cell, index: indexPath)
         return cell
     }
     
     func configureCell(cell: UITableViewCell , index: NSIndexPath ) {
+        //Configure the selected cell by adding a picutre, title, and date to the Cell.
         
         let meme = fetchedResultsController.objectAtIndexPath(index) as Meme
-        
+
         cell.textLabel!.text = String("\(meme.topString) \(meme.bottomString)")
         
         let dirPath = directoryPath()
@@ -125,53 +132,32 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
         formatter.dateStyle = NSDateFormatterStyle.MediumStyle
         formatter.timeStyle = NSDateFormatterStyle.ShortStyle
         cell.detailTextLabel!.text = formatter.stringFromDate(meme.date)
-
     }
     
-    @IBAction func ToggleEditMode(sender: UIBarButtonItem) {
-            if self.tableView.editing == true {
-               self.tableView.setEditing(false, animated: true)
-                sender.title = "Edit"
-            } else  {
-                self.tableView.setEditing(true, animated: true)
-                sender.title = "Done"
-            }
-    }
     
-    //#MARK: - TableView Deleting 
-
-    
+    //#MARK: - TableView Deleting
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        
         return true
     }
     
-    
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        
+        //Asks the data source to commit the deletion of a specified row in the Table.
         if editingStyle == .Delete {
             
             let memeToDelete =
-            fetchedResultsController.objectAtIndexPath(indexPath) as NSManagedObject
-            
+                fetchedResultsController.objectAtIndexPath(indexPath) as NSManagedObject
             self.managedContext.deleteObject(memeToDelete)
-            
             var error: NSError?
-            
             if !managedContext.save(&error) {
                 println("\(error?.localizedDescription)")
             }
         }
-        
     }
-
-    
-
 
     
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    // When user clicks on cell present the MemeDetailController
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
 
         if segue.identifier == "showMeme"{
@@ -182,7 +168,7 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
                 let meme = self.fetchedResultsController.objectAtIndexPath(indexPath) as Meme
                 
                 detailMemeController.managedContext = self.managedContext
-                detailMemeController.selectedImageName = meme.memedImage
+                detailMemeController.selectedMeme = meme
             }
         }
     }
@@ -191,7 +177,6 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
         performSegueWithIdentifier("showMeme", sender: self)
     }
-    
     
     
     //#MARK: - Helper Methods 
@@ -212,6 +197,7 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
         tableView.beginUpdates()
     }
     
+    //Manages changes in the fetchedResultsController
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject,
         atIndexPath indexPath: NSIndexPath!,
         forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath!) {
@@ -236,29 +222,9 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
     }
     
 
-    
-    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int,
-        forChangeType type: NSFetchedResultsChangeType) {
-            
-            let indexSet = NSIndexSet(index: sectionIndex)
-            
-            switch type {
-                case .Insert:
-                    tableView.insertSections(indexSet, withRowAnimation: .Automatic)
-                case .Delete:
-                    tableView.deleteSections(indexSet, withRowAnimation: .Automatic)
-                default :
-                    break
-            }
-    }
-
-    
-    
-    
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         tableView.endUpdates()
     }
-    
     
 
 }

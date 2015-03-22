@@ -15,7 +15,5 @@ class CollectionCell : UICollectionViewCell {
     
     @IBOutlet weak var memedCellImage: UIImageView!
 
-
-    
 }
 
