@@ -10,10 +10,9 @@ import UIKit
 
 
 class CollectionCell : UICollectionViewCell {
-
-    @IBOutlet weak var dateLabel: UILabel!
-    
-    @IBOutlet weak var memedCellImage: UIImageView!
-
+  
+  @IBOutlet weak var dateLabel: UILabel!
+  @IBOutlet weak var memedCellImage: UIImageView!
+  
 }
 
