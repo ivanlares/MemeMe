@@ -17,73 +17,56 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
   "Its purpose is to make developers’ lives easier by abstracting away much of the code needed to synchronize a table view with a data source backed by Core Data." - Core Data by tutorial
   */
   
-  
-  
-  
   //#MARK: - Life Cycle
   override func viewDidLoad() {
     super.viewDidLoad()
     
     let fetchRequest = NSFetchRequest(entityName: "Meme")
-    
     let dateSort =
     NSSortDescriptor(key: "memedImage", ascending: false)
-    
     fetchRequest.sortDescriptors = [dateSort]
-    
     fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
       managedObjectContext: managedContext, sectionNameKeyPath: nil,
       cacheName: nil)
-    
     fetchedResultsController.delegate = self
-    
-    var error: NSError? = nil
-    
-    if (!fetchedResultsController.performFetch(&error)) {
-      println("\(error?.localizedDescription)")
+    do{
+      try fetchedResultsController.performFetch()
+    }catch let error as NSError {
+      print("\(error.localizedDescription)")
     }
-    
-    //Sign up for NSManagedObjectContextDidSaveNotification
-    //To know when other Controllers make changes to the NSPersistentStore
-    //This way we can keep the TableView updated with the latest info
-    var center: NSNotificationCenter = NSNotificationCenter.defaultCenter()
+    let center: NSNotificationCenter = NSNotificationCenter.defaultCenter()
     center.addObserver(self, selector: "refreshData:", name: NSManagedObjectContextDidSaveNotification, object: nil)
   }
   
   //Refresh Data for table
   func refreshData(notification: NSNotification){
-    //Merges any data that was created with other instances of the managedObjectContext
-    //Data that was added in EditMemeController is Merged
     self.managedContext.mergeChangesFromContextDidSaveNotification(notification)
   }
-  
   
   override func viewDidAppear(animated: Bool) {
     
     //Present EditMemeController if (is first Launch) && if (no data in Sore)
-    var delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
     if (delegate.isFirstLaunch == true)  {
       let emptyStore:Bool = self.tableView.numberOfRowsInSection(0) > 0 ? false : true
       if (emptyStore == true) {
-        var storyboard = UIStoryboard(name: "Main", bundle: nil)
-        var editMeme = storyboard.instantiateViewControllerWithIdentifier("EditMemeController") as! EditMemeController
-        self.presentViewController(editMeme, animated: true, completion: nil)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let editMeme = storyboard.instantiateViewControllerWithIdentifier("EditMemeController") as! EditMemeController
         delegate.isFirstLaunch = false
+        self.presentViewController(editMeme, animated: true, completion: nil)
       }
     }
   }
-  
   
   //# MARK: - Actions
   
   @IBAction func didPressAdd(sender: AnyObject) {
     //Grab an instance of EditMemeController and present it modally
-    var storyboard = UIStoryboard(name: "Main", bundle: nil)
-    var editMeme = storyboard.instantiateViewControllerWithIdentifier("EditMemeController") as! UIViewController
+    let storyboard = UIStoryboard(name: "Main", bundle: nil)
+    let editMeme = storyboard.instantiateViewControllerWithIdentifier("EditMemeController")
     self.presentViewController(editMeme, animated: true, completion: nil)
   }
-  
   
   @IBAction func ToggleEditMode(sender: UIBarButtonItem) {
     if self.tableView.editing == true {
@@ -95,7 +78,6 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
     }
   }
   
-  
   // MARK: - Table view data source
   
   override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -104,36 +86,30 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
   
   override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     let sectionInfo =
-    fetchedResultsController.sections![section] as! NSFetchedResultsSectionInfo
+    fetchedResultsController.sections![section]
     return sectionInfo.numberOfObjects
   }
   
   
   override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCellWithIdentifier("memeCell", forIndexPath: indexPath) as! UITableViewCell
+    let cell = tableView.dequeueReusableCellWithIdentifier("memeCell", forIndexPath: indexPath)
     // Configure the cell and return it
     configureCell(cell, index: indexPath)
     return cell
   }
   
   func configureCell(cell: UITableViewCell , index: NSIndexPath ) {
-    //Configure the selected cell by adding a picutre, title, and date to the Cell.
-    
     let meme = fetchedResultsController.objectAtIndexPath(index) as! Meme
-    
     cell.textLabel!.text = String("\(meme.topString) \(meme.bottomString)")
-    
     let dirPath = directoryPath()
-    var getImagePath = dirPath.stringByAppendingPathComponent(meme.memedImage)
+    let getImagePath = dirPath.stringByAppendingString("/\(meme.memedImage)")
     cell.imageView?.contentMode = UIViewContentMode.ScaleAspectFit
     cell.imageView?.image = UIImage(contentsOfFile: getImagePath)
-    
     let formatter = NSDateFormatter()
     formatter.dateStyle = NSDateFormatterStyle.MediumStyle
     formatter.timeStyle = NSDateFormatterStyle.ShortStyle
     cell.detailTextLabel!.text = formatter.stringFromDate(meme.date)
   }
-  
   
   //#MARK: - TableView Deleting
   override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
@@ -141,55 +117,45 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
   }
   
   override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-    //Asks the data source to commit the deletion of a specified row in the Table.
     if editingStyle == .Delete {
-      
       let memeToDelete =
       fetchedResultsController.objectAtIndexPath(indexPath) as! NSManagedObject
       self.managedContext.deleteObject(memeToDelete)
       var error: NSError?
-      if !managedContext.save(&error) {
-        println("\(error?.localizedDescription)")
+      do {
+        try managedContext.save()
+      } catch let error1 as NSError {
+        error = error1
+        print("\(error?.localizedDescription)")
       }
     }
   }
   
-  
   // MARK: - Navigation
   
-  // When user clicks on cell present the MemeDetailController
   override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-    
     if segue.identifier == "showMeme"{
-      
-      var detailMemeController = segue.destinationViewController as! MemeDetailController
-      
-      if let indexPath = self.tableView.indexPathForSelectedRow(){
+      let detailMemeController = segue.destinationViewController as! MemeDetailController
+      if let indexPath = self.tableView.indexPathForSelectedRow{
         let meme = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Meme
-        
         detailMemeController.managedContext = self.managedContext
         detailMemeController.selectedMeme = meme
       }
     }
   }
   
-  
   override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
     performSegueWithIdentifier("showMeme", sender: self)
   }
   
-  
   //#MARK: - Helper Methods
   
   func directoryPath() ->String {
-    let fileManager = NSFileManager.defaultManager()
     let documentsDirectory =
     NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
-    let dirPath = documentsDirectory[0] as! String
-    
+    let dirPath = documentsDirectory[0]
     return dirPath
   }
-  
   
   //#MARK: - NSFetchedResultsControllerDelegate Methods
   
@@ -198,33 +164,26 @@ class TableController: UITableViewController, NSFetchedResultsControllerDelegate
   }
   
   //Manages changes in the fetchedResultsController
-  func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject,
-    atIndexPath indexPath: NSIndexPath?,
-    forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
-      
-      switch type {
-      case .Insert:
-        tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
-      case .Delete:
-        tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: .Automatic)
-      case .Update:
-        let cellToUpdate =
-        self.tableView.cellForRowAtIndexPath(indexPath!) as UITableViewCell!
-        configureCell(cellToUpdate, index: indexPath!)
-      case .Move:
-        tableView.deleteRowsAtIndexPaths([indexPath!],
-          withRowAnimation: .Automatic)
-        tableView.insertRowsAtIndexPaths([newIndexPath!],
-          withRowAnimation: .Automatic)
-      default:
-        break
-      }
-  }
   
+  func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+    switch type {
+    case .Insert:
+      tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
+    case .Delete:
+      tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: .Automatic)
+    case .Update:
+      let cellToUpdate =
+      self.tableView.cellForRowAtIndexPath(indexPath!) as UITableViewCell!
+      configureCell(cellToUpdate, index: indexPath!)
+    case .Move:
+      tableView.deleteRowsAtIndexPaths([indexPath!],
+        withRowAnimation: .Automatic)
+      tableView.insertRowsAtIndexPaths([newIndexPath!],
+        withRowAnimation: .Automatic)
+    }
+  }
   
   func controllerDidChangeContent(controller: NSFetchedResultsController) {
     tableView.endUpdates()
   }
-  
-  
 }

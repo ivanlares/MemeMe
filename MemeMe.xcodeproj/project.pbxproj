@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EA56F6AF1BD3262800CB55BE /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = EA56F6AE1BD3262800CB55BE /* .gitignore */; settings = {ASSET_TAGS = (); }; };
 		EA6EC91E1AB4E04F00028A0D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EC91D1AB4E04F00028A0D /* AppDelegate.swift */; };
 		EA6EC9231AB4E04F00028A0D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EA6EC9211AB4E04F00028A0D /* Main.storyboard */; };
 		EA6EC9251AB4E04F00028A0D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EA6EC9241AB4E04F00028A0D /* Images.xcassets */; };
@@ -33,6 +34,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		EA56F6AE1BD3262800CB55BE /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		EA6EC9181AB4E04F00028A0D /* MemeMe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemeMe.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA6EC91C1AB4E04F00028A0D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EA6EC91D1AB4E04F00028A0D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -73,6 +75,7 @@
 		EA6EC90F1AB4E04F00028A0D = {
 			isa = PBXGroup;
 			children = (
+				EA56F6AE1BD3262800CB55BE /* .gitignore */,
 				EA6EC91A1AB4E04F00028A0D /* MemeMe */,
 				EA6EC9301AB4E04F00028A0D /* MemeMeTests */,
 				EA6EC9191AB4E04F00028A0D /* Products */,
@@ -201,7 +204,9 @@
 		EA6EC9101AB4E04F00028A0D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0620;
+				LastSwiftMigration = 0700;
+				LastSwiftUpdateCheck = 0700;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Ivan Lares";
 				TargetAttributes = {
 					EA6EC9171AB4E04F00028A0D = {
@@ -237,6 +242,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EA56F6AF1BD3262800CB55BE /* .gitignore in Resources */,
 				EA6EC9231AB4E04F00028A0D /* Main.storyboard in Resources */,
 				EA6EC9281AB4E04F00028A0D /* LaunchScreen.xib in Resources */,
 				EA6EC9251AB4E04F00028A0D /* Images.xcassets in Resources */,
@@ -327,6 +333,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -391,6 +398,7 @@
 				INFOPLIST_FILE = MemeMe/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.laresivan.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -402,6 +410,7 @@
 				INFOPLIST_FILE = MemeMe/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.laresivan.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -410,16 +419,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
+				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = MemeMeTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.laresivan.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MemeMe.app/MemeMe";
 			};
@@ -429,12 +436,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
+				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = MemeMeTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.laresivan.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MemeMe.app/MemeMe";
 			};

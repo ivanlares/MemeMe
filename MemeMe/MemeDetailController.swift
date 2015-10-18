@@ -10,6 +10,7 @@ import UIKit
 import CoreData
 
 class MemeDetailController: UIViewController {
+  
   var managedContext: NSManagedObjectContext!
   var selectedMeme: Meme!
   
@@ -19,10 +20,8 @@ class MemeDetailController: UIViewController {
     //Grab selectedMeme from documents directory
     let documentsDirectory =
     NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
-    let dirPath = documentsDirectory[0] as! String
-    var getImagePath = dirPath.stringByAppendingPathComponent(selectedMeme.memedImage)
-    
-    //Show selected Meme
+    let dirPath = documentsDirectory[0] 
+    let getImagePath = dirPath.stringByAppendingString("/\(selectedMeme.memedImage)")
     memeImageView.contentMode  = UIViewContentMode.ScaleAspectFit
     memeImageView.image = UIImage(contentsOfFile: getImagePath)
   }

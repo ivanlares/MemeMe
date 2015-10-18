@@ -9,58 +9,58 @@
 import CoreData
 
 class CoreDataStack {
+
+  let modelName = "MemeMe"
   
+  lazy var context: NSManagedObjectContext = {
+    var managedObjectContext = NSManagedObjectContext(
+      concurrencyType: .MainQueueConcurrencyType)
+    
+    managedObjectContext.persistentStoreCoordinator = self.psc
+    return managedObjectContext
+    }()
   
-  let context:NSManagedObjectContext
-  let psc:NSPersistentStoreCoordinator
-  let model:NSManagedObjectModel
-  let store:NSPersistentStore?
+  private lazy var psc: NSPersistentStoreCoordinator = {
+    let coordinator = NSPersistentStoreCoordinator(
+      managedObjectModel: self.managedObjectModel)
+    let url = self.applicationDocumentsDirectory
+      .URLByAppendingPathComponent(self.modelName)
+    do {
+      let options =
+      [NSMigratePersistentStoresAutomaticallyOption : true]
+      
+      try coordinator.addPersistentStoreWithType(
+        NSSQLiteStoreType, configuration: nil, URL: url,
+        options: options)
+    } catch  {
+      print("Error adding persistent store.")
+    }
+    return coordinator
+    }()
   
+  private lazy var managedObjectModel: NSManagedObjectModel = {
+    
+    let modelURL = NSBundle.mainBundle()
+      .URLForResource(self.modelName,
+        withExtension: "momd")!
+    return NSManagedObjectModel(contentsOfURL: modelURL)!
+    }()
   
-  init(){
-    //The CoreDataStack is created
-    //The store is conected to the model and the cordinator
-    //the cordinator is connected to the context
-    
-    let bundle = NSBundle.mainBundle()
-    let modelURL = bundle.URLForResource("MemeMe", withExtension:"momd")
-    model = NSManagedObjectModel(contentsOfURL: modelURL!)!
-    
-    psc = NSPersistentStoreCoordinator(managedObjectModel:model)
-    
-    context = NSManagedObjectContext()
-    context.persistentStoreCoordinator = psc
-    
-    
-    let documentsURL = CoreDataStack.applicationDocumentsDirectory()
-    let storeURL = documentsURL.URLByAppendingPathComponent("MemeMe")
-    let options = [NSMigratePersistentStoresAutomaticallyOption: true]
-    var error: NSError? = nil
-    store = psc.addPersistentStoreWithType(NSSQLiteStoreType,
-      configuration: nil, URL: storeURL, options: options, error:&error)
-    
+  private lazy var applicationDocumentsDirectory: NSURL = {
+    let urls = NSFileManager.defaultManager().URLsForDirectory(
+      .DocumentDirectory, inDomains: .UserDomainMask)
+    return urls[urls.count-1]
+    }()
+  
+  func saveContext () {
+    if context.hasChanges {
+      do {
+        try context.save()
+      } catch let error as NSError {
+        print("Error: \(error.localizedDescription)")
+        abort()
+      }
+    }
   }
-  
-  
-  func saveContext() {
-    var error: NSError? = nil
-    context.save(&error)
-  }
-  
-  
-  func applicationDocumentsDirectory() -> NSURL {
-    let fileManager = NSFileManager.defaultManager()
-    let urls = fileManager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask) as! [NSURL]
-    
-    return urls[0]
-  }
-  
-  class func applicationDocumentsDirectory() -> NSURL {
-    let fileManager = NSFileManager.defaultManager()
-    let urls = fileManager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask) as! [NSURL]
-    println(urls[0])
-    return urls[0]
-  }
-  
 }
 

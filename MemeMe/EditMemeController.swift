@@ -12,16 +12,10 @@ import CoreData
 class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
   
   @IBOutlet weak var topField: UITextField!
-  
   @IBOutlet weak var bottomField: UITextField!
-  
   @IBOutlet weak var imageView: UIImageView!
-  
   @IBOutlet weak var bottomToolbar: UIToolbar!
-  
   @IBOutlet weak var topToolbar: UIToolbar!
-  
-  
   
   //#MARK: - Life Cycle
   
@@ -38,55 +32,41 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
     topField.defaultTextAttributes = memeTextAttributes
     topField.textAlignment = NSTextAlignment.Center
     topField.text = "TOP"
+    topField.delegate = self
     
     bottomField.defaultTextAttributes = memeTextAttributes
     bottomField.textAlignment = NSTextAlignment.Center
     bottomField.text = "BOTTOM"
-    
+    bottomField.delegate = self
   }
   
   override func viewWillAppear(animated: Bool) {
     configureTopToolbar()
     configureBottomToolBar()
     signUpForNotifications()
-    
   }
   
-  deinit{
-    removeNotifications()
-  }
+  deinit{removeNotifications()}
   
   //#MARK: - Actions
   
   @IBAction func didCancel(sender: AnyObject) {
-    
     self.presentingViewController?.dismissViewControllerAnimated(true, completion: nil)
   }
   
   @IBAction func shareButtonPressed(sender: UIBarButtonItem) {
-    //generateMemedImage returns a memedImage
     let memedImage = generateMemedImage()
-    
-    //UIActivityViewController is created here
-    var controller = UIActivityViewController(activityItems: [memedImage], applicationActivities: nil)
-    
-    //Closure will be executed when (controller: UIActivitViewController) is done
-    controller.completionWithItemsHandler = {(type: String!,completed: Bool, returnedItems: [AnyObject]!, error: NSError!) -> Void in
-      //saves Meme If cancel button is not pressed
-      //Array with activity types that shouldnt be saved: like printing
-      var notSentTypes = [UIActivityTypePrint, UIActivityTypeCopyToPasteboard, UIActivityTypeAssignToContact, UIActivityTypeSaveToCameraRoll, UIActivityTypeAddToReadingList] as [String]
-      //Save only if activity type is not in array
-      if (contains(notSentTypes, type ) == false ){
+    let controller = UIActivityViewController(activityItems: [memedImage], applicationActivities: nil)
+    controller.completionWithItemsHandler = {(type, completed, returnedItems, error) -> Void in
+      let notSentTypes = [UIActivityTypePrint, UIActivityTypeCopyToPasteboard, UIActivityTypeAssignToContact, UIActivityTypeSaveToCameraRoll, UIActivityTypeAddToReadingList] as [String]
+      if completed == true && (notSentTypes.contains(type!) == false ){
         self.saveSentMeme(completed, memedImage: memedImage)
       }
     }
-    //Presents the activityController
     self.presentViewController(controller, animated: true, completion: nil)
   }
   
   @IBAction func pickImageAlbum(sender: UIBarButtonItem) {
-    
-    
     let imagePicker = UIImagePickerController()
     imagePicker.delegate = self
     imagePicker.allowsEditing = false
@@ -100,7 +80,6 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
     imagePicker.sourceType = UIImagePickerControllerSourceType.Camera
     self.presentViewController(imagePicker, animated: true, completion: nil)
   }
-  
   
   @IBAction func toggleBackground(sender: UIBarButtonItem) {
     if self.view.backgroundColor == UIColor.blackColor(){
@@ -116,50 +95,67 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
     if self.imageView.contentMode == UIViewContentMode.ScaleAspectFit{
       self.imageView.contentMode  = UIViewContentMode.ScaleAspectFill
       sender.image = UIImage(named: "fill")
-      
     } else {
       self.imageView.contentMode  = UIViewContentMode.ScaleAspectFit
       sender.image = UIImage(named: "fit")
     }
   }
   
+  func keyboardWillHide(notification: NSNotification){
+    //Move view back in position
+    self.view.frame.origin.y = 0.0
+  }
+  
+  func keyboardWillShow(notification: NSNotification){
+    //Move view up when keyboard blocks bottomTextField
+    if let info:NSDictionary = notification.userInfo {
+      
+      let keyboardSize =
+      (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
+      
+      let keyboardHeight = keyboardSize.height
+      
+      if self.bottomField.isFirstResponder() == true {
+        self.view.frame.origin.y = -(keyboardHeight)
+      }
+    }
+  }
+
   //#MARK: - View
   
   override func prefersStatusBarHidden() -> Bool {
     return true
   }
   
-  
-  
-  
-  override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
+  override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
     topField.resignFirstResponder()
     bottomField.resignFirstResponder()
   }
   
   func configureBottomToolBar(){
-    
     if imageView.image == nil {
-      (bottomToolbar.items![7] as! UIBarButtonItem).enabled = false
-      (bottomToolbar.items![5] as! UIBarButtonItem).enabled = false
+      (bottomToolbar.items![7] ).enabled = false
+      (bottomToolbar.items![5] ).enabled = false
     } else {
-      (bottomToolbar.items![7] as! UIBarButtonItem).enabled = true
-      (bottomToolbar.items![5] as! UIBarButtonItem).enabled = true
+      (bottomToolbar.items![7] ).enabled = true
+      (bottomToolbar.items![5] ).enabled = true
     }
     
-    (bottomToolbar.items![1] as! UIBarButtonItem).enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
-    
+    (bottomToolbar.items![1] ).enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
   }
   
   func configureTopToolbar(){
-    
     if imageView.image == nil {
-      (self.topToolbar.items![0] as! UIBarButtonItem).enabled = false
+      (self.topToolbar.items![0] ).enabled = false
     } else {
-      (self.topToolbar.items![0] as! UIBarButtonItem).enabled = true
+      (self.topToolbar.items![0] ).enabled = true
     }
   }
   
+  override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
+    topField.resignFirstResponder()
+    bottomField.resignFirstResponder()
+  }
   
   //#MARK: - Persistence Methods
   
@@ -172,8 +168,8 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
       let currentDateTime = NSDate()
       
       //Create name for Images
-      var memedImageName = nameForImage(currentDateTime, memed: true)
-      var originalImageName = nameForImage(currentDateTime, memed: false)
+      let memedImageName = nameForImage(currentDateTime, memed: true)
+      let originalImageName = nameForImage(currentDateTime, memed: false)
       
       //Create NSURl for memed Image
       let memePathArray = [dirPath, memedImageName]
@@ -183,10 +179,10 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
       let originalFilePath = NSURL.fileURLWithPathComponents(originalPathArray)
       
       //Save memed image to documents directory
-      let memedImageData:NSData = UIImagePNGRepresentation(memedImage)
+      let memedImageData:NSData = UIImagePNGRepresentation(memedImage)!
       memedImageData.writeToURL(memeFilePath!, atomically: true)
       //Save original image to documents directory
-      let originalImageData:NSData = UIImagePNGRepresentation(self.imageView.image!)
+      let originalImageData:NSData = UIImagePNGRepresentation(self.imageView.image!)!
       originalImageData.writeToURL(originalFilePath!, atomically: true)
       
       //Get refrence to ManagedObjectContext & Create a ManagedObject
@@ -198,31 +194,30 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
       //set the values for the managedObject
       meme.originalImage = originalImageName
       meme.memedImage = memedImageName
-      meme.topString = self.topField.text
-      meme.bottomString = self.bottomField.text
+      meme.topString = self.topField.text!
+      meme.bottomString = self.bottomField.text!
       meme.date = currentDateTime
       //Save to coreData
       var error: NSError?
-      if !managedObjectContext.save(&error) {
-        println("\(error?.localizedDescription)")
+      do {
+        try managedObjectContext.save()
+      } catch let error1 as NSError {
+        error = error1
+        print("\(error?.localizedDescription)")
       }
     }
   }
   
-  
   //#MARK: - Helper Methods
   
   func directoryPath() ->String {
-    let fileManager = NSFileManager.defaultManager()
     let documentsDirectory =
     NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
-    let dirPath = documentsDirectory[0] as! String
-    
+    let dirPath = documentsDirectory[0]
     return dirPath
   }
   
-  func generateMemedImage() -> UIImage
-  {
+  func generateMemedImage() -> UIImage {
     //Hide topToolbar and bottomToolbar
     self.bottomToolbar.hidden = true
     self.topToolbar.hidden = true
@@ -259,67 +254,37 @@ class EditMemeController: UIViewController, UIImagePickerControllerDelegate, UIN
     
   }
   
-  
-  
   //#MARK: - Notification Methods
   
   func signUpForNotifications() {
-    
-    var center: NSNotificationCenter = NSNotificationCenter.defaultCenter()
-    
+    let center: NSNotificationCenter = NSNotificationCenter.defaultCenter()
     center.addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
-    
     center.addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
-    
   }
   
   func removeNotifications(){
-    
-    var center: NSNotificationCenter = NSNotificationCenter.defaultCenter()
-    
+    let center: NSNotificationCenter = NSNotificationCenter.defaultCenter()
     center.removeObserver(self, name: UIKeyboardWillHideNotification, object: nil)
     center.removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
   }
   
   //#MARK: - UIImagePickerControllerDelegate Methods
   
-  func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [NSObject : AnyObject]) {
-    
+  func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
     if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
       self.imageView.contentMode  = UIViewContentMode.ScaleAspectFit
       self.imageView.image = image
     }
-    
     configureBottomToolBar()
     configureTopToolbar()
-    
     self.dismissViewControllerAnimated(true, completion: nil)
-    
   }
   
   //#MARK: - UITextFieldDelgate Methods
   
-  func keyboardWillHide(notification: NSNotification){
-    //Move view back in position
-    self.view.frame.origin.y = 0.0
+  func textFieldShouldReturn(textField: UITextField) -> Bool {
+    topField.resignFirstResponder()
+    bottomField.resignFirstResponder()
+    return true
   }
-  
-  func keyboardWillShow(notification: NSNotification){
-    //Move view up when keyboard blocks bottomTextField
-    if let info:NSDictionary = notification.userInfo {
-      
-      let keyboardSize =
-      (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
-      
-      let keyboardHeight = keyboardSize.height
-      
-      if self.bottomField.isFirstResponder() == true {
-        self.view.frame.origin.y = -(keyboardHeight)
-      }
-    }
-  }
-  
-  
-  
-  
 }

@@ -17,22 +17,20 @@ class Meme: NSManagedObject {
   @NSManaged var memedImage: String
   @NSManaged var date: NSDate
   
-  
-  //Delete image files from documents directory when
-  //NSManagedObject is deleted
   override func prepareForDeletion() {
-    
     let fileManager = NSFileManager.defaultManager()
-    
     let documentsDirectory =
     NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
-    
-    let dirPath = documentsDirectory[0] as! String
-    
-    fileManager.removeItemAtPath("\(dirPath)/\(memedImage)", error: nil)
-    fileManager.removeItemAtPath("\(dirPath)/\(originalImage)", error: nil)
+    let dirPath = documentsDirectory[0]
+    do {
+      try fileManager.removeItemAtPath("\(dirPath)/\(memedImage)")
+    } catch let error as NSError {
+      print(error.localizedDescription)
+    }
+    do {
+      try fileManager.removeItemAtPath("\(dirPath)/\(originalImage)")
+    } catch let error as NSError {
+      print(error.localizedDescription)
+    }
   }
-  
-  
-  
 }

@@ -13,25 +13,18 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
   
   var window: UIWindow?
-  
   lazy var coreDataStack = CoreDataStack()
-  
   var isFirstLaunch: Bool?
   
   func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-    
     isFirstLaunch = true
-    
     let tabBarController = self.window!.rootViewController as! UITabBarController
-    //Give a refrence to the managedObjectContext to the Table and Collection Views
     if let tabItems = tabBarController.viewControllers {
-      //first tab item
-      var navigationController = tabItems[0] as! UINavigationController
+      let navigationController = tabItems[0] as! UINavigationController
       let tableViewController =
       navigationController.topViewController as! TableController
       tableViewController.managedContext = coreDataStack.context
-      //second tab item
-      var navigationControllerCollection = tabItems[1] as! UINavigationController
+      let navigationControllerCollection = tabItems[1] as! UINavigationController
       let collectionViewController =
       navigationControllerCollection.topViewController as! CollectionController
       collectionViewController.managedContext = coreDataStack.context
