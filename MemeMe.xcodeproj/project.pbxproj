@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		EA56F6AF1BD3262800CB55BE /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = EA56F6AE1BD3262800CB55BE /* .gitignore */; settings = {ASSET_TAGS = (); }; };
+		EA0A3BC71C0FB1FB00B736AB /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = EA0A3BC61C0FB1FB00B736AB /* README.md */; };
+		EA56F6AF1BD3262800CB55BE /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = EA56F6AE1BD3262800CB55BE /* .gitignore */; };
 		EA6EC91E1AB4E04F00028A0D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EC91D1AB4E04F00028A0D /* AppDelegate.swift */; };
 		EA6EC9231AB4E04F00028A0D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EA6EC9211AB4E04F00028A0D /* Main.storyboard */; };
 		EA6EC9251AB4E04F00028A0D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EA6EC9241AB4E04F00028A0D /* Images.xcassets */; };
@@ -34,6 +35,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		EA0A3BC61C0FB1FB00B736AB /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		EA56F6AE1BD3262800CB55BE /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		EA6EC9181AB4E04F00028A0D /* MemeMe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemeMe.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA6EC91C1AB4E04F00028A0D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -75,6 +77,7 @@
 		EA6EC90F1AB4E04F00028A0D = {
 			isa = PBXGroup;
 			children = (
+				EA0A3BC61C0FB1FB00B736AB /* README.md */,
 				EA56F6AE1BD3262800CB55BE /* .gitignore */,
 				EA6EC91A1AB4E04F00028A0D /* MemeMe */,
 				EA6EC9301AB4E04F00028A0D /* MemeMeTests */,
@@ -265,6 +268,7 @@
 			files = (
 				EA6EC94C1AB4F29E00028A0D /* CoreDataStack.swift in Sources */,
 				EA6EC9431AB4E90800028A0D /* TableController.swift in Sources */,
+				EA0A3BC71C0FB1FB00B736AB /* README.md in Sources */,
 				EABEAD491ABD3F4100662D3E /* CollectionCell.swift in Sources */,
 				EAFA6B7D1AB9309200581A6E /* MemeDetailController.swift in Sources */,
 				EA6EC94F1AB4F7E000028A0D /* MemeMe.xcdatamodeld in Sources */,

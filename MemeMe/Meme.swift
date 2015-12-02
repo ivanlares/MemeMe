@@ -8,7 +8,9 @@
 
 import Foundation
 import CoreData
-
+func helloWorld(message:String){
+  print(message)
+}
 class Meme: NSManagedObject {
   
   @NSManaged var topString: String
